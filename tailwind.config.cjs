@@ -10,9 +10,9 @@ module.exports = {
     theme: {
         extend: {},
         colors: {
-            transparent: 'transparent',
-            white: '#FFFFFF',
-            black: '#000000',
+            'transparent': 'transparent',
+            'white': '#FFFFFF',
+            'black': '#000000',
             'meri-light': '#E0BFFF',
             'meri-mid': '#BC72FF',
             'meri-dark': '#965CCC',
@@ -28,5 +28,5 @@ module.exports = {
             'warning-dark': '#2E1B06',
         },
     },
-    plugins: [],
+    plugins: [require('daisyui')],
 };
