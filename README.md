@@ -1,9 +1,8 @@
 
 <h1 align="center">
     <br>
-    <img src="https://dev-to-uploads.s3.amazonaws.com/uploads/articles/th5xamgrr6se0x5ro4g6.png" alt="Logo" width="120">
+    <img src="src/assets/logo-black.png" alt="Logo" width="230" alt="Tá quente aqui">
     <br><br>
-    Project Title
 </h1>
 
 <p align="center">
@@ -15,27 +14,23 @@
     <br><br>
 </p>
 
-[*🎯 Roadmap*](./ROADMAP.todo) | [*📚 Documentation*](https://linktodocumentation) | [*👀 Project*](https://linktoproject)
-
 ## ✨ Features
 
-- Light/dark mode toggle
-- Live previews
-- Fullscreen mode
-- Cross platform
+- Register a fire incident
+- View the entire world map and understand where fires are occurring
 
 
 ## 📸 Preview
 
-![App Screenshot](https://via.placeholder.com/728x500.png?text=Imagem+/+Gifs+do+Projeto)
+<img src=".doc/home.png" width="728px"/>
 
 <br>
 
 ## ⚡ Tech Stack
 
-**Client:** <img src="https://img.icons8.com/color/48/000000/vue-js.png" width="18px"/> Vue.js, <img src="https://img.icons8.com/color/48/000000/typescript.png" width="18px"/> TypeScript, <img src="https://img.icons8.com/color/48/000000/tailwind_css.png" width="18px"/> Tailwind, <img src="https://img.icons8.com/color/48/000000/sass-avatar.png" width="18px"/> SASS, <img src="https://vue-styleguidist.github.io/assets/logo.png" width="18px"/> Vue Styleguidist
+**Client:** <img src="https://img.icons8.com/color/48/000000/vue-js.png" width="18px"/> Vue.js, <img src="https://img.icons8.com/color/48/000000/typescript.png" width="18px"/> TypeScript, <img src="https://img.icons8.com/color/48/000000/tailwind_css.png" width="18px"/> Tailwind, <img src="https://daisyui.com/images/daisyui-logo/daisyui-logomark-1024-1024.png" width="18px"/> DaisyUI,
 
-**Server:** Node, Express
+**Server:** PHP Laravel, Firebase
 
 <br>
 
@@ -44,10 +39,10 @@
 Run Locally
 ```bash
 # Clone the project
-  git clone https://link-to-project
+  git clone https://github.com/Merieli/hackaton-nasa-front.git
 
 # Go to the project directory
-  cd pokedex
+  cd hackaton-nasa-front
 
 # Install dependencies
   npm install
