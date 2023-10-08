@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import IconAlert from '@/components/IconAlert.vue';
 import { useMapStore } from '@/store/useMapStore';
+import IconCurrentLocation from './IconCurrentLocation.vue';
+import IconFire from './IconFire.vue';
 
 const props = defineProps({
     isMobile: Boolean,
@@ -23,12 +25,23 @@ const resetSidebar = () => {
         }"
     >
         <li>
-            <router-link to="/home" @click="resetSidebar" @keydown.enter="resetSidebar">
+            <router-link
+                to="/home"
+                @click="resetSidebar"
+                @keydown.enter="resetSidebar"
+                class="hover:text-meri-light active:text-meri-light focus:text-meri-light"
+            >
+                <IconFire />
                 Fire ocurrences (Live)
             </router-link>
         </li>
         <li>
-            <router-link to="/report" @click="resetSidebar" @keydown.enter="resetSidebar">
+            <router-link
+                to="/report"
+                @click="resetSidebar"
+                @keydown.enter="resetSidebar"
+                class="hover:text-meri-light active:text-meri-light focus:text-meri-light"
+            >
                 <IconAlert />
                 Report fire
             </router-link>
@@ -38,10 +51,11 @@ const resetSidebar = () => {
                 id="set-location-button"
                 type="button"
                 ref="locationButton"
+                class="hover:text-meri-light active:text-meri-light focus:text-meri-light"
                 @click="setCurrentLocation"
                 @keydown.enter="setCurrentLocation"
             >
-                Current Location
+                <IconCurrentLocation /> Current Location
             </button>
         </li>
     </ul>

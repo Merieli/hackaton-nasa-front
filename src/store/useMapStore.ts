@@ -1,5 +1,7 @@
+import iconFire from '@/assets/fire-25px.png';
 import router from '@/router';
 import { Loader } from '@googlemaps/js-api-loader';
+import axios from 'axios';
 import { defineStore } from 'pinia';
 import { Ref, reactive, ref } from 'vue';
 
@@ -19,24 +21,26 @@ export const useMapStore = defineStore('map', () => {
             lat: 0,
             lng: 0,
         },
-        date: new Date(),
+        date: '',
     });
-    // TODO: criar array com todos os registro de fogo ou exportar kml e reimportar no mapa
 
-    const fireLocations = reactive({});
+    const allMarkers: Ref<Record<string, string | number>[]> = ref([]);
+
+    const fireLocations = ref({});
 
     const initialLocal = reactive({
-        lat: -34.397,
-        lng: 150.644,
+        lat: -11.22576249341531,
+        lng: -49.73723689584582,
     });
 
-    const mapOptions = {
+    const mapOptions = reactive({
         center: { lat: initialLocal.lat, lng: initialLocal.lng },
         zoom: 6,
         language: 'en',
         disableDefaultUI: true,
         zoomControl: true,
-    };
+        mapId: '4504f8b37365c3d0',
+    });
 
     function handleLocationError(
         browserHasGeolocation: boolean,
@@ -67,7 +71,7 @@ export const useMapStore = defineStore('map', () => {
                     infoWindow.value.setContent('Location found.');
                     infoWindow.value.open(map.value);
                     map.value.setCenter(pos);
-                    map.value.setZoom(18);
+                    map.value.setZoom(12);
                 },
                 () => {
                     handleLocationError(true, infoWindow.value, map.value.getCenter()!);
@@ -79,9 +83,7 @@ export const useMapStore = defineStore('map', () => {
     };
 
     const addNewPoint = (mapsMouseEvent: any) => {
-        // Close the current InfoWindow.
         infoWindow.value.close();
-        // Create a new InfoWindow.
         infoWindow.value = new google.maps.InfoWindow({
             position: mapsMouseEvent.latLng,
         });
@@ -93,9 +95,55 @@ export const useMapStore = defineStore('map', () => {
 
         locationIsSelected.value = true;
 
-        // Salvar latitude e longitude no store para o novo ponto
         infoWindow.value.setContent('Selected fire location');
         infoWindow.value.open(map.value);
+    };
+
+    const getAllMarkers = async () => {
+        const url = `${import.meta.env.VITE_API_PROJECT}/get`;
+        const data: Record<string, string | number> = await axios({
+            method: 'get',
+            url: url,
+        })
+            .then((response) => {
+                return response.data;
+            })
+            .catch(console.error);
+
+        if (!data) throw new Error('No data found');
+
+        const numberOfKeys = Object.keys(data).length;
+
+        for (let i = 0; i < numberOfKeys; i++) {
+            const value: any = Object.values(data)[i];
+
+            allMarkers.value.push(value);
+        }
+    };
+
+    const postInApi = async (data: Record<string, string | number>) => {
+        const url = `${import.meta.env.VITE_API_PROJECT}/create`;
+        const result = await axios
+            .post(url, {
+                lng: data.lng,
+                lat: data.lat,
+                reportBy: data.reportBy,
+                riskInNeighbourhood: data.riskInNeighbourhood,
+                fireSeverity: data.fireSeverity,
+                date: data.date,
+            })
+            .then((response) => {
+                console.info('[Save]');
+            })
+            .catch(console.error);
+    };
+
+    const addAllMarkersInMap = async () => {
+        await getAllMarkers();
+
+        allMarkers.value.forEach((marker) => {
+            createNewMarkerWithInfo(marker);
+        });
     };
 
     const startMap = async (divMap: HTMLElement) => {
@@ -106,125 +154,101 @@ export const useMapStore = defineStore('map', () => {
 
         await loader
             .importLibrary('maps')
-            .then(({ Map, KmlLayer, InfoWindow, StyledMapType }) => {
+            .then(async ({ Map, KmlLayer, InfoWindow, StyledMapType }) => {
                 map.value = new Map(divMap, mapOptions);
 
-                geoLayer.value = new KmlLayer({
-                    url: 'https://firms.modaps.eosdis.nasa.gov/data/active_fire/noaa-20-viirs-c2/kml/J1_VIIRS_C2_Canada_24h.kml',
-                });
+                const nasaDataCanada =
+                    'https://firms.modaps.eosdis.nasa.gov/data/active_fire/noaa-20-viirs-c2/kml/J1_VIIRS_C2_Canada_24h.kml';
+
+                geoLayer.value = new KmlLayer({ url: nasaDataCanada });
                 geoLayer.value.setMap(map.value);
 
                 infoWindow.value = new InfoWindow();
 
-                /*
-                    // Dados JSON com informações dos marcadores
-                    var marcadores = [
-                    {
-                        latitude: -34.397,
-                        longitude: 150.644,
-                        title: "Marcador 1"
-                    },
-                    {
-                        latitude: -33.867,
-                        longitude: 151.209,
-                        title: "Marcador 2"
-                    },
-                    {
-                        latitude: -35.282,
-                        longitude: 149.128,
-                        title: "Marcador 3"
-                    }
-                    ];
-
-                    // Loop para criar marcadores
-                    for (var i = 0; i < marcadores.length; i++) {
-                        var marcador = marcadores[i];
-                        var marker = new google.maps.Marker({
-                            position: { lat: marcador.latitude, lng: marcador.longitude },
-                            map: map,
-                            title: marcador.title
-                        });
-                    }
-                }
-                */
+                await addAllMarkersInMap();
 
                 if (router.currentRoute.value.name === 'ReportFire') {
                     map.value.addListener('click', addNewPoint);
                 }
-
-                // new StyledMapType({
-
-                // })
             })
             .catch((e) => {
-                console.debug('🟣 ~ file: MapWithFireBase.vue:102 ~ .then ~ e:', e);
+                console.error('Error:', e);
             });
     };
 
-    const createNewMarkerWithInfo = (details: Record<string, string | number>) => {
+    const createNewMarkerWithInfo = async (details: Record<string, string | number>) => {
         infoWindow.value.close();
+
+        const currentInfowindow = new google.maps.InfoWindow({
+            content: /* html */ `
+            <div>
+                <p class="text-neutral-500 pb-2">Reported by <b>${details.reportBy}</b></p>
+                <p>Risk around: ${details.riskInNeighbourhood}</p>
+                <p>Severity: ${details.fireSeverity}</p>
+                <p class="text-neutral-500 text-[11px] pt-2">Registered on: ${details.date}</p>
+            </div>`,
+            ariaLabel: 'Fire details',
+        });
+
         const marker = new google.maps.Marker({
             position: {
-                lat: registerFire.position.lat,
-                lng: registerFire.position.lng,
+                lat: details.lat as number,
+                lng: details.lng as number,
             },
             map: map.value,
-            title: 'test',
-            // icon
+            title: 'Fire in location',
+            icon: iconFire,
         });
 
-        // Referencias para testar:
-        // https://developers.google.com/maps/documentation/javascript/marker-clustering
-
-        // TODO: Adicionar dados do banco de dados
-        const dataToShow = ref(`
-            Reported by NASA / ${details.reportBy}
-            Risk in neighbourhood: ${details.riskInNeighbourhood}
-        `);
-
-        infoWindow.value.setContent(
-            `Selected fire location sdf sdf sdf sdf sdf sdf 
-            sdf sdffffffffffs sdf sdf sdf sdf sd sd fsdf sd 
-            sdfsdfsddddddddddddddd`,
-        );
-        infoWindow.value.setPosition({
-            lat: registerFire.position.lat,
-            lng: registerFire.position.lng,
-        });
-        // marker.setIcon(prop.iconImage);
-        marker.setMap(map.value);
         marker.addListener('click', () => {
-            infoWindow.value.open(map.value, marker);
+            currentInfowindow.open({
+                anchor: marker,
+                map: map.value,
+            });
         });
     };
 
-    const saveDataOfRegisterFire = (details: Record<string, string>) => {
-        // TODO: Salvar dados:
+    const showModalSaved = () => {
+        const modal = document.getElementById('send_fire_info') as HTMLDialogElement;
+
+        modal.showModal();
+    };
+
+    const saveDataOfRegisterFire = async (details: Record<string, string>) => {
+        if (!details.reportBy) throw new Error('Report by is required');
+
         registerFire.riskInNeighbourhood =
             details.riskInNeighbourhood || 'No details reported';
         registerFire.reportBy = details.reportBy;
         registerFire.fireSeverity = details.fireSeverity;
 
-        // TODO: Gerar nova data
-
         const currentData = new Date();
-        const dataUtc = Date.UTC(
-            currentData.getFullYear(),
-            currentData.getMonth(),
-            currentData.getDate(),
-            currentData.getHours(),
-            currentData.getMinutes(),
-            currentData.getSeconds(),
-        );
-        console.debug(
-            '🟣 ~ file: useMapStore.ts:212 ~ saveDataOfRegisterFire ~ dataUtc:',
-            dataUtc,
-        );
+        registerFire.date = currentData.toString();
 
-        // createNewMarkerWithInfo(details);
+        const newData = {
+            reportBy: registerFire.reportBy,
+            riskInNeighbourhood: registerFire.riskInNeighbourhood,
+            fireSeverity: registerFire.fireSeverity,
+            lat: registerFire.position.lat,
+            lng: registerFire.position.lng,
+            date: registerFire.date,
+        };
 
-        // TODO: Exibir modal de confirmação e mudar para a página inicial
-        // Texto do modal: Report Saved! We communicated to the authorities in the region to combat the fire
+        await createNewMarkerWithInfo(newData);
+
+        await postInApi(newData);
+
+        showModalSaved();
+
+        registerFire.riskInNeighbourhood = '';
+        registerFire.reportBy = '';
+        registerFire.fireSeverity = '';
+        registerFire.date = '';
+        registerFire.position = {
+            lat: 0,
+            lng: 0,
+        };
+        router.push({ name: 'home' });
     };
 
     return {

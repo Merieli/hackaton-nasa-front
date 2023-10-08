@@ -4,11 +4,12 @@ import { defineEmits, ref } from 'vue';
 const props = defineProps({
     label: String,
     placeholder: String,
+    error: String,
 });
 
 const emit = defineEmits(['value']);
 
-const textValue = ref('Teste');
+const textValue = ref('');
 const errorMessage = ref('');
 const hasError = ref(false);
 
@@ -35,7 +36,7 @@ const validInput = () => {
 <template>
     <div class="form-control w-full max-w-xs pb-4">
         <label class="label">
-            <span class="label-text">{{ label }}</span>
+            <span class="label-text">{{ label }} <b class="text-danger-light">*</b></span>
         </label>
         <input
             v-model="textValue"

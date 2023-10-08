@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Logo from '@/assets/logo.png';
 import IconHamburguer from '@/components/IconHamburguer.vue';
 import NavigationList from '@/components/NavigationList.vue';
 
@@ -10,7 +11,7 @@ import NavigationList from '@/components/NavigationList.vue';
         <input id="my-drawer-3" type="checkbox" class="drawer-toggle" />
         <div class="drawer-content flex flex-col w-full">
             <!-- Navbar -->
-            <header class="w-full navbar bg-meri-light">
+            <header class="w-full navbar bg-meri-dark text-white">
                 <div class="flex-none lg:hidden">
                     <label
                         for="my-drawer-3"
@@ -21,8 +22,11 @@ import NavigationList from '@/components/NavigationList.vue';
                     </label>
                 </div>
                 <div class="flex-1 px-2 mx-2">
-                    <router-link to="/home">
-                        <h1 class="">Ta quente aqui</h1>
+                    <router-link to="/home" class="">
+                        <img :src="Logo" width="120" />
+                        <h1 v-show="false" class="hover:text-meri-light">
+                            Tá quente aqui
+                        </h1>
                     </router-link>
                 </div>
                 <div class="flex-none hidden lg:block">

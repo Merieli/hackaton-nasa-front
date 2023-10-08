@@ -26,4 +26,21 @@ body,
     margin: 0;
     padding: 0;
 }
+
+.property {
+    background-color: blue;
+
+    align-items: center;
+    background-color: #fff;
+    border-radius: 50%;
+    color: #263238;
+    display: flex;
+    font-size: 14px;
+    gap: 15px;
+    height: 30px;
+    justify-content: center;
+    padding: 4px;
+    position: relative;
+    width: 30px;
+}
 </style>
