@@ -2,7 +2,6 @@
 <h1 align="center">
     <br>
     <img src="src/assets/logo-black.png" alt="Logo" width="230" alt="Tá quente aqui">
-    <br><br>
 </h1>
 
 <p align="center">
